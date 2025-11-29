@@ -1,0 +1,195 @@
+@prefix : <http://kik.misis.ru/ontology/mpi/2024/education-access/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xml: <http://www.w3.org/XML/1998/namespace> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix swrl: <http://www.w3.org/2003/11/swrl#> .
+@prefix swrlb: <http://www.w3.org/2003/11/swrlb#> .
+@base <http://kik.misis.ru/ontology/mpi/2024/education-access/> .
+
+<http://kik.misis.ru/ontology/mpi/2024/education-access> rdf:type owl:Ontology .
+
+#################################################################
+#    Object Properties
+#################################################################
+
+:обучается_на_программе rdf:type owl:ObjectProperty ;
+                       rdfs:domain :Студент ;
+                       rdfs:range :ОбразовательнаяПрограмма .
+
+:включает rdf:type owl:ObjectProperty ,
+                   owl:TransitiveProperty .
+
+:имеет_автора rdf:type owl:ObjectProperty ;
+              rdfs:domain :Запрос ;
+              rdfs:range :Студент .
+
+:обращается_к rdf:type owl:ObjectProperty ;
+              rdfs:domain :Запрос ;
+              rdfs:range :ЭлектронныйОбразовательныйРесурс .
+
+#################################################################
+#    Classes
+#################################################################
+
+:Студент rdf:type owl:Class .
+
+:ОбразовательнаяПрограмма rdf:type owl:Class .
+
+:Предмет rdf:type owl:Class .
+
+:ЭлектронныйОбразовательныйРесурс rdf:type owl:Class .
+
+:Запрос rdf:type owl:Class .
+
+:ВалидныйЗапрос rdf:type owl:Class ;
+                rdfs:subClassOf :Запрос .
+
+#################################################################
+#    Individuals
+#################################################################
+
+:Иван_Петров rdf:type owl:NamedIndividual ,
+                        :Студент ;
+             :обучается_на_программе :Прикладная_Информатика .
+
+:Мария_Сидорова rdf:type owl:NamedIndividual ,
+                           :Студент ;
+                :обучается_на_программе :Математика .
+
+:Прикладная_Информатика rdf:type owl:NamedIndividual ,
+                                   :ОбразовательнаяПрограмма ;
+                        :включает :Базы_Данных .
+
+:Математика rdf:type owl:NamedIndividual ,
+                       :ОбразовательнаяПрограмма ;
+            :включает :Математический_Анализ .
+
+:Базы_Данных rdf:type owl:NamedIndividual ,
+                        :Предмет ;
+             :включает :SQL_Учебник .
+
+:Математический_Анализ rdf:type owl:NamedIndividual ,
+                                  :Предмет ;
+                       :включает :Пределы_И_Непрерывность .
+
+:SQL_Учебник rdf:type owl:NamedIndividual ,
+                        :ЭлектронныйОбразовательныйРесурс .
+
+:Пределы_И_Непрерывность rdf:type owl:NamedIndividual ,
+                                    :ЭлектронныйОбразовательныйРесурс .
+
+:Запрос_1 rdf:type owl:NamedIndividual ,
+                     :Запрос ;
+          :имеет_автора :Иван_Петров ;
+          :обращается_к :SQL_Учебник .
+
+:Запрос_2 rdf:type owl:NamedIndividual ,
+                     :Запрос ;
+          :имеет_автора :Мария_Сидорова ;
+          :обращается_к :SQL_Учебник .
+
+#################################################################
+#    SWRL Rule
+#################################################################
+
+:ValidAccessRule rdf:type owl:Axiom ;
+                 owl:annotatedSource :ValidAccessRule ;
+                 owl:annotatedProperty owl:implies ;
+                 owl:annotatedTarget [
+                    rdf:type owl:ObjectProperty ;
+                    owl:propertyChain (
+                      :имеет_автора
+                      :обучается_на_программе
+                      :включает
+                      :включает
+                    )
+                 ] ;
+                 rdfs:comment "Правило проверки валидности доступа: если студент запрашивает ресурс, связанный с его образовательной программой, то запрос является валидным" .
+
+:ValidAccessRule rdf:type swrl:Imp ;
+    swrl:body [
+        rdf:type swrl:AtomList ;
+        rdf:first [
+            rdf:type swrl:ClassAtom ;
+            swrl:classPredicate :Запрос ;
+            swrl:argument1 :x
+        ] ;
+        rdf:rest [
+            rdf:type swrl:AtomList ;
+            rdf:first [
+                rdf:type swrl:IndividualPropertyAtom ;
+                swrl:propertyPredicate :имеет_автора ;
+                swrl:argument1 :x ;
+                swrl:argument2 :student
+            ] ;
+            rdf:rest [
+                rdf:type swrl:AtomList ;
+                rdf:first [
+                    rdf:type swrl:ClassAtom ;
+                    swrl:classPredicate :Студент ;
+                    swrl:argument1 :student
+                ] ;
+                rdf:rest [
+                    rdf:type swrl:AtomList ;
+                    rdf:first [
+                        rdf:type swrl:IndividualPropertyAtom ;
+                        swrl:propertyPredicate :обучается_на_программе ;
+                        swrl:argument1 :student ;
+                        swrl:argument2 :program
+                    ] ;
+                    rdf:rest [
+                        rdf:type swrl:AtomList ;
+                        rdf:first [
+                            rdf:type swrl:ClassAtom ;
+                            swrl:classPredicate :ОбразовательнаяПрограмма ;
+                            swrl:argument1 :program
+                        ] ;
+                        rdf:rest [
+                            rdf:type swrl:AtomList ;
+                            rdf:first [
+                                rdf:type swrl:IndividualPropertyAtom ;
+                                swrl:propertyPredicate :включает ;
+                                swrl:argument1 :program ;
+                                swrl:argument2 :resource
+                            ] ;
+                            rdf:rest [
+                                rdf:type swrl:AtomList ;
+                                rdf:first [
+                                    rdf:type swrl:ClassAtom ;
+                                    swrl:classPredicate :ЭлектронныйОбразовательныйРесурс ;
+                                    swrl:argument1 :resource
+                                ] ;
+                                rdf:rest [
+                                    rdf:type swrl:AtomList ;
+                                    rdf:first [
+                                        rdf:type swrl:IndividualPropertyAtom ;
+                                        swrl:propertyPredicate :обращается_к ;
+                                        swrl:argument1 :x ;
+                                        swrl:argument2 :resource
+                                    ] ;
+                                    rdf:rest rdf:nil
+                                ]
+                            ]
+                        ]
+                    ]
+                ]
+            ]
+        ]
+    ] ;
+    swrl:head [
+        rdf:type swrl:AtomList ;
+        rdf:first [
+            rdf:type swrl:ClassAtom ;
+            swrl:classPredicate :ВалидныйЗапрос ;
+            swrl:argument1 :x
+        ] ;
+        rdf:rest rdf:nil
+    ] .
+
+### Переменные для SWRL правила
+:student rdf:type swrl:Variable .
+:program rdf:type swrl:Variable .
+:resource rdf:type swrl:Variable .
+:x rdf:type swrl:Variable .

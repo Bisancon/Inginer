@@ -1,0 +1,98 @@
+@prefix : <http://kik.misis.ru/ontology/mpi/2024/education-access/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xml: <http://www.w3.org/XML/1998/namespace> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@base <http://kik.misis.ru/ontology/mpi/2024/education-access/> .
+
+<http://kik.misis.ru/ontology/mpi/2024/education-access> rdf:type owl:Ontology .
+
+#################################################################
+#    Object Properties
+#################################################################
+
+###  Обучение на программе
+:обучается_на_программе rdf:type owl:ObjectProperty ;
+                       rdfs:domain :Студент ;
+                       rdfs:range :ОбразовательнаяПрограмма .
+
+###  Включение (транзитивное свойство)
+:включает rdf:type owl:ObjectProperty ,
+                   owl:TransitiveProperty .
+
+###  Автор запроса
+:имеет_автора rdf:type owl:ObjectProperty ;
+              rdfs:domain :Запрос ;
+              rdfs:range :Студент .
+
+###  Обращение к ресурсу
+:обращается_к rdf:type owl:ObjectProperty ;
+              rdfs:domain :Запрос ;
+              rdfs:range :ЭлектронныйОбразовательныйРесурс .
+
+#################################################################
+#    Classes
+#################################################################
+
+:Студент rdf:type owl:Class .
+
+:ОбразовательнаяПрограмма rdf:type owl:Class .
+
+:Предмет rdf:type owl:Class .
+
+:ЭлектронныйОбразовательныйРесурс rdf:type owl:Class .
+
+:Запрос rdf:type owl:Class .
+
+:ВалидныйЗапрос rdf:type owl:Class ;
+                rdfs:subClassOf :Запрос .
+
+#################################################################
+#    Individuals
+#################################################################
+
+### Студенты
+:Иван_Петров rdf:type owl:NamedIndividual ,
+                        :Студент ;
+             :обучается_на_программе :Прикладная_Информатика .
+
+:Мария_Сидорова rdf:type owl:NamedIndividual ,
+                           :Студент ;
+                :обучается_на_программе :Математика .
+
+### Образовательные программы
+:Прикладная_Информатика rdf:type owl:NamedIndividual ,
+                                   :ОбразовательнаяПрограмма ;
+                        :включает :Базы_Данных .
+
+:Математика rdf:type owl:NamedIndividual ,
+                       :ОбразовательнаяПрограмма ;
+            :включает :Математический_Анализ .
+
+### Предметы
+:Базы_Данных rdf:type owl:NamedIndividual ,
+                        :Предмет ;
+             :включает :SQL_Учебник .
+
+:Математический_Анализ rdf:type owl:NamedIndividual ,
+                                  :Предмет ;
+                       :включает :Пределы_И_Непрерывность .
+
+### Электронные образовательные ресурсы
+:SQL_Учебник rdf:type owl:NamedIndividual ,
+                        :ЭлектронныйОбразовательныйРесурс .
+
+:Пределы_И_Непрерывность rdf:type owl:NamedIndividual ,
+                                    :ЭлектронныйОбразовательныйРесурс .
+
+### Запросы
+:Запрос_1 rdf:type owl:NamedIndividual ,
+                     :Запрос ;
+          :имеет_автора :Иван_Петров ;
+          :обращается_к :SQL_Учебник .
+
+:Запрос_2 rdf:type owl:NamedIndividual ,
+                     :Запрос ;
+          :имеет_автора :Мария_Сидорова ;
+          :обращается_к :SQL_Учебник .
